@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "ElevaTok",
+  "version": "0.11.0",
+  "description": "Choose your mood and interests, then open related search results directly on TikTok. No scraping or account automation.",
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_title": "ElevaTok"
+  },
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'none'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+  },
+  "background": {
+    "service_worker": "launcher.js"
+  }
+}
