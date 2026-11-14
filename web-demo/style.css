@@ -180,3 +180,6 @@ html,body,.app,.workspace,.sidebar,.workspace>header,.content,.content>footer,.j
 #discover-view.journey{--bg:#0b2241;--panel:#143252;--input:#143252;--accent:#abcaff;background-attachment:scroll}
 #discover-view.journey .journey-step{background:#0b2241;background-image:none}
 #discover-view.journey::before,.journey-step::before{display:none}
+
+#headspace-tips{background:#122e4c;border-color:#7895b9}#headspace-tips h2{color:#edf4ff}#headspace-tips #headspace-tip{color:#f3f7ff}#headspace-tips .wellbeing-caption,#headspace-tips .tip-source,#headspace-tips .flow-hint{color:#c1d1e6}#headspace-tips .tip-source a:hover{color:#ffffff}
+
