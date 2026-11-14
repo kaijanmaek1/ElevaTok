@@ -126,18 +126,16 @@ test('toolbar opens a full tab, reuses the local view and never activates an unr
  await clicked();assert.equal(opened.length,1);assert.equal(activated[0].id,1);assert.equal(focused[0].focused,true);
  tabs.get(1).url='https://example.com';await clicked();assert.equal(opened.length,2);assert.equal(activated.length,1,'unrelated tabs must not be activated or replaced');
 });
-test('themes follow the system initially, remember explicit choice, and leave the current note and search intact',async()=>{
- const appearance={},ui=await mount({elevatokSearchCursor:0},appearance,true);assert.equal(ui.getTheme(),'dark');assert.equal(ui.get('theme-dark').attributes['aria-pressed'],'true');
- ui.get('note').value='show BMW cars';ui.get('note').oninput();const url=ui.get('open-tiktok').href;
- ui.get('theme-light').onclick();assert.equal(ui.getTheme(),'light');assert.equal(ui.get('theme-light').attributes['aria-pressed'],'true');assert.equal(ui.get('theme-dark').attributes['aria-pressed'],'false');assert.equal(ui.get('note').value,'show BMW cars');assert.equal(ui.get('open-tiktok').href,url);assert.equal(ui.navigations.length,0);
- const reopened=await mount({elevatokSearchCursor:0},appearance,true);assert.equal(reopened.getTheme(),'light');
- reopened.get('theme-dark').onclick();assert.equal(appearance.elevatokTheme,'dark');
+test('one ocean theme ignores previous appearance settings and has no theme toggle',async()=>{
+ const ui=await mount({}, {elevatokTheme:'light'},true);assert.equal(ui.getTheme(),'ocean');assert.doesNotMatch(ui.root.innerHTML,/id="theme-(light|dark)"/);
+ const other=await mount({}, {elevatokTheme:'dark'},false);assert.equal(other.getTheme(),'ocean');
 });
+
 test('logo, Home and About open the description and returning keeps the note, theme and search',async()=>{
- const ui=await mount();ui.get('note').value='show BMW cars';ui.get('note').oninput();ui.get('theme-dark').onclick();const url=ui.get('open-tiktok').href;
+ const ui=await mount();ui.get('note').value='show BMW cars';ui.get('note').oninput();const url=ui.get('open-tiktok').href;
  for(const id of ['home-logo','home-nav','about-link']){
  ui.get(id).onclick({preventDefault(){}});assert.equal(ui.get('home-view').hidden,false);assert.equal(ui.get('discover-view').hidden,true);assert.equal(ui.get('view-title').textContent,'Home');
- ui.get('home-start').onclick({preventDefault(){}});assert.equal(ui.get('home-view').hidden,true);assert.equal(ui.get('discover-view').hidden,false);assert.equal(ui.get('note').value,'show BMW cars');assert.equal(ui.get('open-tiktok').href,url);assert.equal(ui.getTheme(),'dark');
+ ui.get('home-start').onclick({preventDefault(){}});assert.equal(ui.get('home-view').hidden,true);assert.equal(ui.get('discover-view').hidden,false);assert.equal(ui.get('note').value,'show BMW cars');assert.equal(ui.get('open-tiktok').href,url);assert.equal(ui.getTheme(),'ocean');
  }
  assert.equal(ui.navigations.length,0,'opening the home screen never opens TikTok');
 });

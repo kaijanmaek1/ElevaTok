@@ -173,3 +173,10 @@ header{background:var(--rail);border-color:var(--border)}
 .feeling-slider output .mood-face{width:42px;height:42px}.slider-faces .mood-face{width:27px;height:27px;color:#c7dbfa}
 @media(max-width:720px){.app{height:100dvh;min-height:0;grid-template-rows:auto minmax(0,1fr)}.workspace{height:100%;min-height:0}.workspace>header{min-height:65px;padding:10px 16px;gap:10px}.journey-step{padding:20px 20px 32px}.journey-step h1{font-size:29px}.emoji-moods{gap:9px}.emoji-moods button{min-height:57px}.journey-controls{padding:8px 16px}.content:has(.journey)>footer>span:last-child{display:none}}
 @media(max-height:700px){.journey-step{padding-top:18px}.journey-step h1{font-size:30px}.journey-lead{font-size:13px;margin-bottom:14px}.experience-choice{min-height:42px;padding:9px 12px}.journey-step .wellbeing-card{padding:14px 18px}}
+
+/* One permanent ocean theme, with the same surface across every step. */
+:root,:root[data-theme=ocean]{color-scheme:dark;--bg:#0b2241;--rail:#0b2241;--panel:#143252;--input:#143252;--hover:#204363;--border:#365679;--border-strong:#7b9bc3;--button-outline:#7b9bc3;--text:#edf4ff;--muted:#b9cde6;--faint:#a2bbda;--accent:#abcaff;--selected:#244b75;--selected-text:#f1f6ff;--selected-border:#a6c8fa}
+html,body,.app,.workspace,.sidebar,.workspace>header,.content,.content>footer,.journey-controls,#discover-view.journey{background:#0b2241;background-image:none}
+#discover-view.journey{--bg:#0b2241;--panel:#143252;--input:#143252;--accent:#abcaff;background-attachment:scroll}
+#discover-view.journey .journey-step{background:#0b2241;background-image:none}
+#discover-view.journey::before,.journey-step::before{display:none}
