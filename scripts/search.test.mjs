@@ -260,3 +260,16 @@ test('Previous and Back to start retain input and navigate to the expected scree
  ui.get('journey-start').onclick();assert.equal(journey.dataset.activeStep,'mood');assert.equal(ui.get('note').value,'show cats');assert.equal(ui.get('journey-progress').textContent,'1 / 8');assert.equal(ui.navigations.length,0);
  assert.match(ui.get('feeling-before-label').innerHTML,/mood-face/);assert.match(ui.root.innerHTML,/slider-faces[^]*mood-face/);
 });
+
+test('unchanged initial slider values can be selected by pointer and keyboard',async()=>{
+ const shared={},ui=await mount(shared),slider=ui.get('feeling-before');
+ slider.onpointerdown({});slider.onpointerup({});assert.equal(ui.get('discover-view').dataset.activeStep,'experience');assert.equal(shared.elevatokCheckin.feeling,3);
+ const writes=ui.stored.length;slider.onchange({});slider.onclick({});assert.equal(ui.stored.length,writes,'release/change/click commit only once');
+ ui.get('journey-previous').onclick();slider.onkeydown({key:'Enter',preventDefault(){}});assert.equal(ui.get('discover-view').dataset.activeStep,'experience');
+ ui.get('open-tiktok').click();ui.get('skip-feedback').onclick();const after=ui.get('feeling-after');after.onpointerdown({});after.onpointerup({});assert.equal(ui.get('discover-view').dataset.activeStep,'mood');assert.equal(ui.get('reflection').hidden,true);assert.deepEqual(shared.elevatokFeedback.weights,{});
+});
+test('slider drag waits for release and pointer cancellation does not advance',async()=>{
+ const ui=await mount(),slider=ui.get('feeling-before');ui.nodes.find(node=>node.dataset.mood==='Happy').onclick();ui.get('headspace-tips').onclick({});
+ slider.onpointerdown({});slider.value='4';slider.oninput({});slider.onchange({});assert.equal(ui.get('discover-view').dataset.activeStep,'before');slider.onpointercancel({});assert.equal(ui.get('discover-view').dataset.activeStep,'before');
+ slider.onpointerdown({});slider.onpointerup({});assert.equal(ui.get('discover-view').dataset.activeStep,'experience');
+});

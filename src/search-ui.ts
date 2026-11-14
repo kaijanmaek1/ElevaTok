@@ -102,13 +102,14 @@ export function mountSearch(root:HTMLElement){
  note.onkeydown=event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();if(accepted&&ready)travelTo('launch');}};
  note.oninput=()=>{followUp=null;revision++;update();};experience.onchange=()=>{if(!accepted||!ready)return;followUp=null;revision++;update();travelTo('note');};
  find<HTMLButtonElement>('#another').onclick=()=>{if(!accepted||!ready)return;revision++;cursor++;update();status.textContent='Another direction is ready. Your note is unchanged.';};
+ let resetSliderCommits=()=>{};
  open.onclick=event=>{
  const result=accepted&&ready?relatedSearch(mood,searchNote(),experience.value as Intention,cursor,learning):null;
  if(!result){event.preventDefault();return;}
  open.href=result.url;
  const before=Number(find<HTMLSelectElement>('#feeling-before').value);
  pendingFeeling=before>=1&&before<=5?{choice:{topic:result.topic,subject:result.subject,key:result.key},before}:null;
- find<HTMLElement>('#reflection').hidden=!pendingFeeling;find<HTMLInputElement>('#feeling-after').value=String(currentFeeling);syncFeeling('after');find<HTMLElement>('#reflection-status').textContent='';
+ find<HTMLElement>('#reflection').hidden=!pendingFeeling;find<HTMLInputElement>('#feeling-after').value=String(currentFeeling);syncFeeling('after');resetSliderCommits();find<HTMLElement>('#reflection-status').textContent='';
  find<HTMLElement>('#reflection-context').textContent=pendingFeeling?'Before exploring: '+before+'/5. This check-in applies to your latest search.':'';
  currentFeeling=before;saveCheckin();
  learning=recordSearch(learning,result);cursor++;revision++;drawFeedback();travelTo('feedback',true);
@@ -127,6 +128,22 @@ export function mountSearch(root:HTMLElement){
  find<HTMLElement>('#status').textContent=after===before?'Check-in complete. Your feeling was unchanged, so preferences stayed the same.':after>before?'Check-in complete. Similar topics get a small preference boost.':'Check-in complete. Similar topics get less preference. Consider a screen break or reaching out to someone you trust.';
  find<HTMLElement>('#journey-status').textContent=find<HTMLElement>('#status').textContent;travelTo('mood',true);
  };
+ // A range does not emit change when its initial value is selected again.
+ // Defer pointer changes until release and deduplicate change/up/click events.
+ const sliderResets:(()=>void)[]=[];
+ for(const id of ['#feeling-before','#feeling-after']){
+ const slider=find<HTMLInputElement>(id),change=slider.onchange,input=slider.oninput;
+ let dragging=false,committed=false;sliderResets.push(()=>{dragging=false;committed=false;});
+ const commit=(event:Event)=>{if(committed||!accepted||!ready)return;const value=Number(slider.value);if(Number.isInteger(value)&&value>=1&&value<=5)committed=true;change?.call(slider,event);};
+ slider.onpointerdown=()=>{dragging=true;committed=false;};
+ slider.onpointerup=event=>{dragging=false;commit(event);};
+ slider.onpointercancel=()=>{dragging=false;committed=false;};
+ slider.onclick=event=>{if(!dragging)commit(event);};
+ slider.oninput=event=>{committed=false;input?.call(slider,event);};
+ slider.onchange=event=>{if(!dragging)commit(event);};
+ slider.onkeydown=event=>{committed=false;if(event.key==='Enter'||event.key===' '){event.preventDefault();commit(event);}};
+ }
+ resetSliderCommits=()=>sliderResets.forEach(reset=>reset());
  find<HTMLButtonElement>('#skip-feeling').onclick=()=>{pendingFeeling=null;find<HTMLElement>('#reflection').hidden=true;};
  find<HTMLFormElement>('#checkin').onsubmit=event=>{event.preventDefault();if(open.hasAttribute('href'))open.click();};
  async function eraseData(clearCheckin=false){
