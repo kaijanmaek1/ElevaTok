@@ -210,3 +210,10 @@ test('journey has seven screens in forward order, sliders and no back button',as
  assert.match(html,/id="feeling-before" type="range"/);assert.match(html,/id="feeling-after" type="range"/);assert.doesNotMatch(html,/flow-restart|Back to your headspace/);
  for(const id of ['mood','tip','before','experience','note','launch'])assert.equal(typeof ui.get('flow-'+id).onclick,'function');
 });
+
+
+test('completed reflection returns to the beginning and saves the new current feeling',async()=>{
+ const shared={},ui=await mount(shared);ui.get('feeling-before').value='2';ui.get('open-tiktok').click();assert.equal(ui.get('discover-view').dataset.activeStep,'reflect');
+ ui.get('feeling-after').value='4';ui.get('save-feeling').onclick();assert.equal(ui.get('discover-view').dataset.activeStep,'mood');assert.equal(ui.get('feeling-before').value,'4');assert.equal(shared.elevatokCheckin.feeling,4);assert.match(ui.get('journey-status').textContent,/Check-in complete/);
+ ui.get('flow-mood').onclick();assert.equal(ui.get('discover-view').dataset.activeStep,'tip');assert.equal(ui.navigations.length,1);
+});

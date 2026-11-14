@@ -93,3 +93,17 @@ button:disabled{border-style:dashed}.primary[aria-disabled=true]{border-color:va
 .content:has(.journey:not([hidden]))>footer{padding:10px 25px;min-height:63px;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}
 @media(max-width:720px){#discover-view.journey{height:calc(100dvh - 220px);min-height:420px}.journey-step{padding:28px 22px}.emoji-moods{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.emoji-moods button{font-size:30px;min-height:65px}.journey-step h1{font-size:34px}.journey-lead{font-size:13px}.content:has(.journey:not([hidden]))>footer{gap:8px;padding:10px 15px}}
 @media(prefers-reduced-motion:reduce){#discover-view.journey{scroll-behavior:auto}.emoji-moods button{transition:none}.emoji-moods button:hover{transform:none}}
+
+/* Ocean depth: slow diffuse light, distant currents and a quiet horizon. */
+#discover-view.journey{position:relative;isolation:isolate;background:#062333;color:#e4f4f6;--text:#e4f4f6;--muted:#b2d0d7;--faint:#a2c4cd;--bg:#062333;--panel:#103b4b;--input:#0c3041;--border:#35616e;--button-outline:#6e99a4;--accent:#80dfd2;--selected:#174c5a;--selected-text:#d7fff7;--selected-border:#80dfd2}
+#discover-view.journey::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 20% -20%,#67d6ce40,transparent 53%),radial-gradient(ellipse at 88% 85%,#176d8038,transparent 60%),linear-gradient(160deg,#0b3c4c 0%,#062333 45%,#02131f 100%)}
+.journey-step{position:relative;background:radial-gradient(ellipse at 15% 0%,#81e4d010,transparent 60%),linear-gradient(180deg,#082f3e40,#02131f35);scroll-behavior:auto}
+.journey-step::before{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(110deg,transparent 0%,#94e8dc04 11%,transparent 22%);mask-image:linear-gradient(#000,transparent 80%);animation:sea-drift 22s ease-in-out infinite alternate}
+.journey-step .step-inner{position:relative;z-index:1}.journey-step h1{color:#eefbfc;text-shadow:0 3px 28px #00121d60;outline:none}.journey-step .journey-kicker{color:#90c9ce}
+.journey-step .flow-next{background:#b2ede0;color:#05232d;border-color:#b2ede0;min-height:49px;box-shadow:0 5px 25px #00151e30;transition:background .3s,box-shadow .3s,transform .3s}
+.journey-step .flow-next:hover{background:#d1fff3;box-shadow:0 8px 30px #78dbcc22;transform:translateX(3px)}
+.flow-next .ui-icon{width:19px;height:19px}.journey-step select,.journey-step textarea{background:#0c3041;color:#e4f4f6;border-color:#6e99a4}.journey-step .composer{background:#0c3041}.journey-step textarea::placeholder{color:#9dbbc5}
+.journey-step .emoji-moods button{background:#103b4b;color:#e4f4f6;border-color:#6e99a4}.journey-step .emoji-moods button[aria-pressed=true]{background:#1d5861;border-color:#80dfd2;box-shadow:0 0 24px #80dfd21a,inset 0 0 0 1px #80dfd2}
+.journey-status:empty{display:none}.journey-status{color:#b2ede0;font-size:13px;line-height:1.7;border-left:2px solid #80dfd2;padding-left:14px}
+@keyframes sea-drift{from{opacity:.5;transform:translateX(-8px)}to{opacity:1;transform:translateX(8px)}}
+@media(prefers-reduced-motion:reduce){.journey-step::before{animation:none}.journey-step .flow-next:hover{transform:none}}
