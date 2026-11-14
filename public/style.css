@@ -150,3 +150,26 @@ header{background:var(--rail);border-color:var(--border)}
 #journey-feedback .text-button,#journey-reflect .text-button{background:#0b213f;color:#c9dcf4;border-color:#7897bd}
 
 .path-button{padding:9px 13px;border:1px solid var(--selected-border);border-radius:10px;background:var(--selected);color:var(--selected-text);font-size:12px;cursor:pointer}#feedback-path{margin:18px 10px 12px 0}.header-actions{flex-wrap:wrap;gap:10px}@media(max-width:720px){header{height:auto;min-height:82px;padding-top:10px;padding-bottom:10px}.path-button{font-size:10px;padding:7px 9px}}
+
+/* Allocate the available viewport instead of subtracting a guessed header height. */
+.workspace{height:100dvh;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.workspace>header{flex:none;position:relative;height:auto;min-height:72px;padding-top:12px;padding-bottom:12px}
+.content:has(.journey){flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.content:has(.journey)>#home-view{overflow-y:auto;padding:30px 38px;max-width:820px;margin:auto}
+#discover-view.journey{flex:1;height:auto!important;min-height:0!important;grid-auto-rows:100%;scroll-snap-type:y proximity}
+.journey-step{padding:24px clamp(20px,5vw,64px) 40px;align-items:flex-start;scroll-snap-stop:normal}
+.journey-step .step-inner{margin:0 auto;max-width:620px}
+.journey-step h1{font-size:clamp(28px,3.5vw,43px);margin:14px 0 16px;line-height:1.15}
+.journey-lead{margin:0 0 20px;font-size:14px;line-height:1.65}
+.journey-step .wellbeing-card{margin:18px 0;padding:18px 20px}
+.experience-choices{margin:14px 0;gap:8px}.experience-choice{padding:12px 14px;min-height:48px}
+.emoji-moods{margin:20px 0;gap:12px}.emoji-moods button{min-height:66px;padding:10px}
+.content:has(.journey)>footer{flex:none;min-height:0!important;padding:8px 18px!important;gap:8px!important;font-size:10px}
+.journey-controls{flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px clamp(20px,5vw,64px);background:var(--rail);border-bottom:1px solid var(--border)}
+.journey-controls button{background:transparent;color:var(--text);font-size:11px;padding:7px 11px;border-color:var(--button-outline);border-radius:8px}
+.journey-controls button:disabled{opacity:.35}.journey-controls span{font-size:11px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.content:has(#discover-view[hidden])>.journey-controls{display:none}
+.feeling-slider output{display:flex;align-items:center;justify-content:center;gap:14px;font-size:21px;margin-bottom:18px}
+.feeling-slider output .mood-face{width:42px;height:42px}.slider-faces .mood-face{width:27px;height:27px;color:#c7dbfa}
+@media(max-width:720px){.app{height:100dvh;min-height:0;grid-template-rows:auto minmax(0,1fr)}.workspace{height:100%;min-height:0}.workspace>header{min-height:65px;padding:10px 16px;gap:10px}.journey-step{padding:20px 20px 32px}.journey-step h1{font-size:29px}.emoji-moods{gap:9px}.emoji-moods button{min-height:57px}.journey-controls{padding:8px 16px}.content:has(.journey)>footer>span:last-child{display:none}}
+@media(max-height:700px){.journey-step{padding-top:18px}.journey-step h1{font-size:30px}.journey-lead{font-size:13px;margin-bottom:14px}.experience-choice{min-height:42px;padding:9px 12px}.journey-step .wellbeing-card{padding:14px 18px}}

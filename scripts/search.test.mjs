@@ -204,7 +204,7 @@ test('emoji headspaces have accessible names and check-in is restored only after
  const reopened=await mount(shared,{},false,false);assert.equal(reopened.reads.length,0);await reopened.get('consent-accept').onclick();assert.equal(reopened.get('feeling-before').value,'4');assert.equal(reopened.get('feeling-before').attributes['aria-valuetext'],'Good');
  reopened.get('review-consent').onclick();await reopened.get('consent-delete').onclick();assert.equal(shared.elevatokCheckin,undefined);
 });
-test('journey has eight screens in forward order, sliders and no back button',async()=>{
+test('journey has eight ordered screens, sliders and no redundant continue button',async()=>{
  const ui=await mount();const html=ui.root.innerHTML;let last=-1;
  for(const id of ['mood','tip','before','experience','note','launch','feedback','reflect']){const position=html.indexOf('id="journey-'+id+'"');assert.ok(position>last,id);last=position;}
  assert.match(html,/id="feeling-before" type="range"/);assert.match(html,/id="feeling-after" type="range"/);assert.doesNotMatch(html,/flow-restart|Back to your headspace/);
@@ -252,4 +252,13 @@ test('Try a different path reopens experience choices without losing the note or
  const ui=await mount();ui.get('note').value='show dogs, no news';ui.get('note').oninput();
  for(const id of ['change-direction','feedback-path']){ui.get(id).onclick();assert.equal(ui.get('discover-view').dataset.activeStep,'experience');assert.equal(ui.get('note').value,'show dogs, no news');assert.equal(ui.navigations.length,0);}
  assert.match(ui.root.innerHTML,/Try a different path/);
+});
+
+
+test('Previous and Back to start retain input and navigate to the expected screens',async()=>{
+ const ui=await mount(),journey=ui.get('discover-view');assert.equal(ui.get('journey-previous').disabled,true);
+ ui.nodes.find(node=>node.dataset.mood==='Happy').onclick();assert.equal(ui.get('journey-previous').disabled,false);ui.get('journey-previous').onclick();assert.equal(journey.dataset.activeStep,'mood');
+ ui.get('change-direction').onclick();ui.nodes.find(node=>node.className==='experience-choice').onclick();ui.get('note').value='show cats';ui.get('note').oninput();ui.get('use-note').onclick();ui.get('journey-previous').onclick();assert.equal(journey.dataset.activeStep,'note');assert.equal(ui.get('note').value,'show cats');
+ ui.get('journey-start').onclick();assert.equal(journey.dataset.activeStep,'mood');assert.equal(ui.get('note').value,'show cats');assert.equal(ui.get('journey-progress').textContent,'1 / 8');assert.equal(ui.navigations.length,0);
+ assert.match(ui.get('feeling-before-label').innerHTML,/mood-face/);assert.match(ui.root.innerHTML,/slider-faces[^]*mood-face/);
 });
