@@ -198,3 +198,5 @@ html,body,.app,.workspace,.sidebar,.workspace>header,.content,.content>footer,.j
 .face-excited{--face-ink:#ffc48a;--face-fill:#553f2f}
 .face-overwhelmed{--face-ink:#ffaaa9;--face-fill:#56353e}
 .face-calm{--face-ink:#9de4c9;--face-fill:#214b49}
+
+.headspace-symbol{width:42px;height:42px;padding:3px;overflow:visible}.headspace-symbol>circle{fill:var(--face-fill)}
