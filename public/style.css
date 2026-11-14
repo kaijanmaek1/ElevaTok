@@ -200,3 +200,6 @@ html,body,.app,.workspace,.sidebar,.workspace>header,.content,.content>footer,.j
 .face-calm{--face-ink:#9de4c9;--face-fill:#214b49}
 
 .headspace-symbol{width:42px;height:42px;padding:3px;overflow:visible}.headspace-symbol>circle{fill:var(--face-fill)}
+
+.native-emoji{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:38px;line-height:1;display:inline-flex;align-items:center;justify-content:center;font-weight:400;font-style:normal;padding:0;overflow:visible}
+.slider-faces .native-emoji{font-size:25px}.feeling-slider output .native-emoji{font-size:36px}
