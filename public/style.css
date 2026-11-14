@@ -121,3 +121,18 @@ button:disabled{border-style:dashed}.primary[aria-disabled=true]{border-color:va
 .journey-step select,.journey-step textarea,.journey-step .composer{background:#0b2143;color:#e6efff}
 .journey-status{color:#c5dafa;border-color:#9abfff}
 @media(prefers-reduced-motion:reduce){.journey-step .flow-next:hover{transform:none}}
+
+/* One continuous background paints across the entire scrollable depth. */
+#discover-view.journey{background:linear-gradient(180deg,#244878 0%,#18375f 15%,#102b50 30%,#0b2041 45%,#071830 62%,#040e20 80%,#020713 100%);background-attachment:local;background-repeat:no-repeat}
+#discover-view.journey::before,.journey-step::before{display:none}
+#discover-view.journey .journey-step{background:transparent}
+.experience-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}
+.experience-choice{padding:15px;text-align:left;min-height:58px;background:#10294c88;color:#e4efff;border:1px solid #819abe;border-radius:14px;font-size:13px}
+.experience-choice:hover,.experience-choice[aria-pressed=true]{background:#274d78;border-color:#bed6ff}
+#experience[hidden]+.experience-choices+.select-chevron{display:none}
+.flow-hint{font-size:12px;line-height:1.7;color:var(--muted);margin-top:22px}
+#headspace-tips[role=button]{cursor:pointer}#headspace-tips[role=button]:focus-visible{outline:2px solid #bdd7ff;outline-offset:6px}
+.note-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}.note-actions .flow-hint{flex:1;margin:0}.note-actions #use-note{padding:12px;background:#c0d5f7;color:#071a37;border-radius:50%}
+@media(max-width:480px){.experience-choices{gap:8px}.experience-choice{font-size:12px;padding:12px}}
+
+.note-actions #use-note .ui-icon{transform:rotate(90deg)}

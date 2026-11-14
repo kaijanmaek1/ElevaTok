@@ -181,13 +181,13 @@ test('before and after feelings adjust bounded preferences without recording rat
 test('feeling check-in applies once to the opened search, preserves exclusions and can be skipped',async()=>{
  const shared={elevatokSearchCursor:0},ui=await mount(shared);
  ui.get('feeling-before').value='2';ui.get('open-tiktok').click();assert.equal(ui.get('reflection').hidden,false);
- ui.get('feeling-after').value='';ui.get('save-feeling').onclick();assert.match(ui.get('reflection-status').textContent,/Choose/);
- ui.get('feeling-after').value='4';ui.get('save-feeling').onclick();assert.equal(ui.get('reflection').hidden,true);
+ ui.get('feeling-after').value='';ui.get('feeling-after').onchange();assert.match(ui.get('reflection-status').textContent,/Choose/);
+ ui.get('feeling-after').value='4';ui.get('feeling-after').onchange();assert.equal(ui.get('reflection').hidden,true);
  assert.equal(shared.elevatokFeedback.weights['topic:nature'],1);
- const stored=JSON.stringify(shared),count=ui.stored.length;ui.get('save-feeling').onclick();assert.equal(ui.stored.length,count);assert.doesNotMatch(stored,/before|after|rating/);
+ const stored=JSON.stringify(shared),count=ui.stored.length;ui.get('feeling-after').onchange();assert.equal(ui.stored.length,count);assert.doesNotMatch(stored,/before|after|rating/);
  ui.get('note').value='show cars, no nature';ui.get('note').oninput();assert.match(new URL(ui.get('open-tiktok').href).searchParams.get('q'),/cars|automotive/);
  ui.get('feeling-before').value='3';ui.get('open-tiktok').click();ui.get('skip-feeling').onclick();assert.equal(ui.get('reflection').hidden,true);
- ui.get('feeling-after').value='1';ui.get('save-feeling').onclick();assert.equal(shared.elevatokFeedback.weights['topic:cars'],undefined);
+ ui.get('feeling-after').value='1';ui.get('feeling-after').onchange();assert.equal(shared.elevatokFeedback.weights['topic:cars'],undefined);
  ui.nodes.find(node=>node.dataset.mood==='Lonely').onclick();assert.match(ui.get('headspace-tip').textContent,/message someone/);
 });
 test('deletion and declining clear transient ratings and pending reflection',async()=>{
@@ -208,20 +208,34 @@ test('journey has seven screens in forward order, sliders and no back button',as
  const ui=await mount();const html=ui.root.innerHTML;let last=-1;
  for(const id of ['mood','tip','before','experience','note','launch','reflect']){const position=html.indexOf('id="journey-'+id+'"');assert.ok(position>last,id);last=position;}
  assert.match(html,/id="feeling-before" type="range"/);assert.match(html,/id="feeling-after" type="range"/);assert.doesNotMatch(html,/flow-restart|Back to your headspace/);
- for(const id of ['mood','tip','before','experience','note','launch'])assert.equal(typeof ui.get('flow-'+id).onclick,'function');
+ assert.doesNotMatch(html,/id="flow-/);assert.ok(ui.nodes.some(node=>node.className==='experience-choice'));
 });
 
 
 test('completed reflection returns to the beginning and saves the new current feeling',async()=>{
  const shared={},ui=await mount(shared);ui.get('feeling-before').value='2';ui.get('open-tiktok').click();assert.equal(ui.get('discover-view').dataset.activeStep,'reflect');
- ui.get('feeling-after').value='4';ui.get('save-feeling').onclick();assert.equal(ui.get('discover-view').dataset.activeStep,'mood');assert.equal(ui.get('feeling-before').value,'4');assert.equal(shared.elevatokCheckin.feeling,4);assert.match(ui.get('journey-status').textContent,/Check-in complete/);
- ui.get('flow-mood').onclick();assert.equal(ui.get('discover-view').dataset.activeStep,'tip');assert.equal(ui.navigations.length,1);
+ ui.get('feeling-after').value='4';ui.get('feeling-after').onchange();assert.equal(ui.get('discover-view').dataset.activeStep,'mood');assert.equal(ui.get('feeling-before').value,'4');assert.equal(shared.elevatokCheckin.feeling,4);assert.match(ui.get('journey-status').textContent,/Check-in complete/);
+ ui.nodes.find(node=>node.dataset.mood==='Happy').onclick();assert.equal(ui.get('discover-view').dataset.activeStep,'tip');assert.equal(ui.navigations.length,1);
 });
 
 
 test('vertical transitions animate scrollTop progressively and release snapping when complete',async()=>{
  const ui=await mount({}, {}, false, true, true),journey=ui.get('discover-view');
- ui.get('flow-mood').onclick();ui.frame(0);ui.frame(625);assert.ok(journey.scrollTop>0&&journey.scrollTop<600);assert.equal(journey.style.scrollSnapType,'none');
+ ui.nodes.find(node=>node.dataset.mood==='Happy').onclick();ui.frame(0);ui.frame(625);assert.ok(journey.scrollTop>0&&journey.scrollTop<600);assert.equal(journey.style.scrollSnapType,'none');
  ui.frame(1250);assert.equal(journey.scrollTop,600);assert.equal(journey.style.scrollSnapType,undefined);
- ui.get('flow-tip').onclick();ui.frame(1400);ui.frame(2650);assert.equal(journey.scrollTop,1200);
+ ui.get('headspace-tips').onclick({});ui.frame(1400);ui.frame(2650);assert.equal(journey.scrollTop,1200);
+});
+
+
+test('choices advance automatically while typing and dragging do not interrupt input',async()=>{
+ const ui=await mount(),journey=ui.get('discover-view');
+ ui.nodes.find(node=>node.dataset.mood==='Calm').onclick();assert.equal(journey.dataset.activeStep,'tip');
+ ui.get('headspace-tips').onclick({});assert.equal(journey.dataset.activeStep,'before');
+ ui.get('feeling-before').value='4';ui.get('feeling-before').oninput();assert.equal(journey.dataset.activeStep,'before');ui.get('feeling-before').onchange();assert.equal(journey.dataset.activeStep,'experience');
+ ui.nodes.find(node=>node.className==='experience-choice').onclick();assert.equal(journey.dataset.activeStep,'note');
+ ui.get('note').value='show dogs';ui.get('note').oninput();assert.equal(journey.dataset.activeStep,'note');
+ ui.get('note').onkeydown({key:'Enter',shiftKey:true,preventDefault(){}});assert.equal(journey.dataset.activeStep,'note');
+ ui.get('note').onkeydown({key:'Enter',shiftKey:false,preventDefault(){}});assert.equal(journey.dataset.activeStep,'launch');
+ assert.equal(ui.navigations.length,0);ui.get('open-tiktok').click();assert.equal(journey.dataset.activeStep,'reflect');
+ ui.get('feeling-after').value='5';ui.get('feeling-after').oninput();assert.equal(journey.dataset.activeStep,'reflect');ui.get('feeling-after').onchange();assert.equal(journey.dataset.activeStep,'mood');
 });

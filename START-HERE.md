@@ -39,4 +39,4 @@ Click the ElevaTok logo, Home in the sidebar, or About ElevaTok in the footer to
 
 Consent demo: every page opening or toolbar revisit asks again. Agree enables personalized searches; Decline pauses them. Use Consent & data choices to pause or delete stored data and the current check-in. Returning directly from TikTok keeps feedback available.
 
-The check-in now moves left to right through seven screens. Mood buttons show emojis with hover/focus labels. Current headspace and the overall feeling slider are saved locally for the session after consent. After ratings remain in page memory. Use Delete stored data to clear saved check-ins. Rebuild the web demo with node scripts/build-web-demo.mjs after building the extension.
+The check-in now moves down through seven screens. Mood buttons show emojis with hover/focus labels. Current headspace and the overall feeling slider are saved locally for the session after consent. After ratings remain in page memory. Use Delete stored data to clear saved check-ins. Rebuild the web demo with node scripts/build-web-demo.mjs after building the extension.
