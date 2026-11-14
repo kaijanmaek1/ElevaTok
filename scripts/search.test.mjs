@@ -34,7 +34,7 @@ async function mount(shared={elevatokSearchCursor:0},appearance={},systemDark=fa
  const root=new Element();
  const document={getElementById:()=>root,createElement:tag=>new Element(tag),fullscreenElement:null,documentElement:{dataset:{},async requestFullscreen(){document.fullscreenElement=document.documentElement;}},async exitFullscreen(){document.fullscreenElement=null;},addEventListener(){},removeEventListener(){}};
  const unavailable=()=>{throw new Error('Reading or saving personal data is forbidden');};
- const chrome={storage:{local:{get:unavailable,set:unavailable,async remove(keys){removed.push(['local',keys]);}},session:{async get(keys){reads.push(Array.from(keys));assert.deepEqual(Array.from(keys),['elevatokSearchCursor','elevatokFeedback']);return structuredClone(shared);},async set(data){assert.ok(Object.keys(data).every(key=>['elevatokSearchCursor','elevatokFeedback'].includes(key)));if('elevatokSearchCursor' in data)assert.ok(Number.isSafeInteger(data.elevatokSearchCursor));Object.assign(shared,structuredClone(data));stored.push(structuredClone(data));},async remove(keys){removed.push(['session',keys]);for(const key of keys)delete shared[key];}}}};
+ const chrome={storage:{local:{get:unavailable,set:unavailable,async remove(keys){removed.push(['local',keys]);}},session:{async get(keys){reads.push(Array.from(keys));assert.deepEqual(Array.from(keys),['elevatokSearchCursor','elevatokFeedback','elevatokCheckin']);return structuredClone(shared);},async set(data){assert.ok(Object.keys(data).every(key=>['elevatokSearchCursor','elevatokFeedback','elevatokCheckin'].includes(key)));if('elevatokSearchCursor' in data)assert.ok(Number.isSafeInteger(data.elevatokSearchCursor));Object.assign(shared,structuredClone(data));stored.push(structuredClone(data));},async remove(keys){removed.push(['session',keys]);for(const key of keys)delete shared[key];}}}};
  const location={hash:''};
  const localStorage={removeItem(key){delete appearance[key];},getItem(key){assert.equal(key,'elevatokTheme');return appearance[key]??null;},setItem(key,value){assert.equal(key,'elevatokTheme');assert.ok(['light','dark'].includes(value));appearance[key]=value;}};
  vm.runInNewContext(readFileSync('dist/app.js','utf8'),{document,chrome,localStorage,location,addEventListener(type,fn){listeners[type]=fn;},removeEventListener(type){delete listeners[type];},matchMedia:()=>({matches:systemDark}),setTimeout,fetch(){throw new Error('No network requests allowed');}});
@@ -80,7 +80,7 @@ test('repeated opens and reopening the popup rotate searches while preserving th
  assert.equal(new Set(ui.navigations).size,3);assert.ok(ui.navigations.every(url=>new URL(url).searchParams.get('q').includes('bmw')));assert.equal(note.value,'show BMW cars');
  const reopened=await mount(counter);reopened.get('note').value=note.value;reopened.get('note').oninput();reopened.get('open-tiktok').click();
  assert.ok(!ui.navigations.includes(reopened.navigations[0]));assert.equal(counter.elevatokSearchCursor,4);
- assert.ok(ui.stored.every(record=>Object.keys(record).every(key=>['elevatokSearchCursor','elevatokFeedback'].includes(key))));
+ assert.ok(ui.stored.every(record=>Object.keys(record).every(key=>['elevatokSearchCursor','elevatokFeedback','elevatokCheckin'].includes(key))));
 });
 test('feedback changes future topic and subject choices without overriding the explicit prompt',()=>{
  const first=relatedSearch('Stressed','','unwind',0);
@@ -106,7 +106,7 @@ test('one-tap feedback survives popup closure, applies to the last search, and c
  assert.equal(relatedSearch('Stressed','','unwind',shared.elevatokSearchCursor,shared.elevatokFeedback).topic,'nature');
  ui.get('feedback-undo').onclick();assert.deepEqual(shared.elevatokFeedback.weights,{});assert.equal(ui.get('feedback-more').disabled,false);
  ui.get('feedback-less').onclick();assert.notEqual(relatedSearch('Stressed','','unwind',shared.elevatokSearchCursor,shared.elevatokFeedback).topic,'nature');
- const stored=JSON.stringify(shared);assert.doesNotMatch(stored,/show nature and animals|https:|Stressed/,'no full note, URL or mood label is stored');
+ const stored=JSON.stringify(shared);assert.doesNotMatch(stored,/show nature and animals|https:/,'no full note or URL is stored');
 });
 test('More like this follows the last specific subject after reopening, without saving or restoring the raw note',async()=>{
  const shared={elevatokSearchCursor:0},first=await mount(shared);first.get('note').value='I had a long day, show BMW cars';first.get('note').oninput();first.get('open-tiktok').click();
@@ -181,7 +181,7 @@ test('before and after feelings adjust bounded preferences without recording rat
 test('feeling check-in applies once to the opened search, preserves exclusions and can be skipped',async()=>{
  const shared={elevatokSearchCursor:0},ui=await mount(shared);
  ui.get('feeling-before').value='2';ui.get('open-tiktok').click();assert.equal(ui.get('reflection').hidden,false);
- ui.get('save-feeling').onclick();assert.match(ui.get('reflection-status').textContent,/Choose/);
+ ui.get('feeling-after').value='';ui.get('save-feeling').onclick();assert.match(ui.get('reflection-status').textContent,/Choose/);
  ui.get('feeling-after').value='4';ui.get('save-feeling').onclick();assert.equal(ui.get('reflection').hidden,true);
  assert.equal(shared.elevatokFeedback.weights['topic:nature'],1);
  const stored=JSON.stringify(shared),count=ui.stored.length;ui.get('save-feeling').onclick();assert.equal(ui.stored.length,count);assert.doesNotMatch(stored,/before|after|rating/);
@@ -192,6 +192,21 @@ test('feeling check-in applies once to the opened search, preserves exclusions a
 });
 test('deletion and declining clear transient ratings and pending reflection',async()=>{
  const ui=await mount();ui.get('feeling-before').value='2';ui.get('open-tiktok').click();ui.get('review-consent').onclick();await ui.get('consent-delete').onclick();
- assert.equal(ui.get('reflection').hidden,true);assert.equal(ui.get('feeling-before').value,'');
+ assert.equal(ui.get('reflection').hidden,true);assert.equal(ui.get('feeling-before').value,'3');
  await ui.get('consent-accept').onclick();ui.get('feeling-before').value='3';ui.get('open-tiktok').click();ui.get('review-consent').onclick();ui.get('consent-decline').onclick();assert.equal(ui.get('reflection').hidden,true);
+});
+
+
+test('emoji headspaces have accessible names and check-in is restored only after consent',async()=>{
+ const shared={},ui=await mount(shared);const happy=ui.nodes.find(node=>node.dataset.mood==='Happy');
+ assert.equal(happy.attributes['aria-label'],'Happy');assert.equal(happy.attributes.title,'Happy');assert.notEqual(happy.textContent,'Happy');
+ happy.onclick();ui.get('feeling-before').value='4';ui.get('feeling-before').oninput();assert.equal(shared.elevatokCheckin.mood,'Happy');assert.equal(shared.elevatokCheckin.feeling,4);
+ const reopened=await mount(shared,{},false,false);assert.equal(reopened.reads.length,0);await reopened.get('consent-accept').onclick();assert.equal(reopened.get('feeling-before').value,'4');assert.equal(reopened.get('feeling-before').attributes['aria-valuetext'],'Good');
+ reopened.get('review-consent').onclick();await reopened.get('consent-delete').onclick();assert.equal(shared.elevatokCheckin,undefined);
+});
+test('journey has seven screens in forward order, sliders and no back button',async()=>{
+ const ui=await mount();const html=ui.root.innerHTML;let last=-1;
+ for(const id of ['mood','tip','before','experience','note','launch','reflect']){const position=html.indexOf('id="journey-'+id+'"');assert.ok(position>last,id);last=position;}
+ assert.match(html,/id="feeling-before" type="range"/);assert.match(html,/id="feeling-after" type="range"/);assert.doesNotMatch(html,/flow-restart|Back to your headspace/);
+ for(const id of ['mood','tip','before','experience','note','launch'])assert.equal(typeof ui.get('flow-'+id).onclick,'function');
 });

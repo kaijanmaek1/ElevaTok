@@ -67,3 +67,29 @@ button:disabled{border-style:dashed}.primary[aria-disabled=true]{border-color:va
 
 
 .creator-credit{display:block;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.2px}
+
+/* Immersive horizontal check-in journey. */
+.content:has(.journey:not([hidden])){max-width:none;padding:0;margin:0}
+#discover-view.journey{display:grid;grid-auto-flow:column;grid-auto-columns:100%;width:100%;height:calc(100dvh - 145px);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;scroll-behavior:smooth;overscroll-behavior-x:contain}
+.journey::-webkit-scrollbar{display:none}
+#checkin{display:contents;padding:0;border:0;box-shadow:none;background:none}
+.journey-step{scroll-snap-align:start;scroll-snap-stop:always;overflow-y:auto;min-width:0;display:flex;align-items:safe center;justify-content:center;padding:38px 40px;background:radial-gradient(ellipse at 90% 15%,color-mix(in srgb,var(--accent) 7%,transparent),transparent 65%)}
+.step-inner{width:min(100%,620px);margin:auto}
+.journey-kicker{font-size:10px;letter-spacing:2px;color:var(--muted)}
+.journey-step h1{font-size:clamp(30px,4vw,52px);line-height:1.12;margin:22px 0;letter-spacing:-1.8px}
+.journey-lead{font-size:15px;line-height:1.8;color:var(--muted);margin-bottom:28px}
+.journey-step .flow-next{display:flex;align-items:center;justify-content:space-between;gap:35px;margin-top:30px;padding:13px 20px;min-width:180px;background:var(--text);color:var(--bg);border-color:var(--text);border-radius:30px;font-size:13px}
+.flow-next span{font-size:21px}
+.journey-step fieldset legend{font-size:0;margin:0}.journey-step fieldset legend .step{display:none}
+.emoji-moods{grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;margin:28px 0}
+.emoji-moods button{font-size:34px;padding:12px 4px;min-height:76px;background:var(--panel);border-radius:22px;transition:transform .18s,background .18s,box-shadow .18s;position:relative}
+.emoji-moods button:hover{transform:translateY(-4px)}
+.emoji-moods button::after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);padding:6px 10px;border-radius:8px;background:var(--text);color:var(--bg);font:12px/1.4 system-ui,sans-serif;white-space:nowrap;opacity:0;visibility:hidden;pointer-events:none;z-index:8;transition:opacity .15s .6s,visibility 0s .6s}
+.emoji-moods button:hover::after,.emoji-moods button:focus-visible::after{opacity:1;visibility:visible}
+.feeling-slider{padding:22px 0}.feeling-slider output{display:block;font-size:25px;font-weight:500;text-align:center;margin-bottom:26px;color:var(--text)}
+.feeling-slider input[type=range]{display:block;width:100%;accent-color:var(--accent);cursor:pointer;height:32px}
+.slider-faces{display:flex;justify-content:space-between;font-size:25px;padding:9px 0}
+.journey-step .before-field{margin:24px 0}.journey-step select{width:100%}.journey-step .feedback-panel{margin-top:26px}.journey-end{color:var(--muted);font-size:13px;margin-top:30px}
+.content:has(.journey:not([hidden]))>footer{padding:10px 25px;min-height:63px;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}
+@media(max-width:720px){#discover-view.journey{height:calc(100dvh - 220px);min-height:420px}.journey-step{padding:28px 22px}.emoji-moods{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.emoji-moods button{font-size:30px;min-height:65px}.journey-step h1{font-size:34px}.journey-lead{font-size:13px}.content:has(.journey:not([hidden]))>footer{gap:8px;padding:10px 15px}}
+@media(prefers-reduced-motion:reduce){#discover-view.journey{scroll-behavior:auto}.emoji-moods button{transition:none}.emoji-moods button:hover{transform:none}}
