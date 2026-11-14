@@ -107,3 +107,17 @@ button:disabled{border-style:dashed}.primary[aria-disabled=true]{border-color:va
 .journey-status:empty{display:none}.journey-status{color:#b2ede0;font-size:13px;line-height:1.7;border-left:2px solid #80dfd2;padding-left:14px}
 @keyframes sea-drift{from{opacity:.5;transform:translateX(-8px)}to{opacity:1;transform:translateX(8px)}}
 @media(prefers-reduced-motion:reduce){.journey-step::before{animation:none}.journey-step .flow-next:hover{transform:none}}
+
+/* Vertical layout and direct frame scrolling avoid native smooth-scroll conflicts. */
+#discover-view.journey{grid-auto-flow:row;grid-template-columns:100%;grid-auto-columns:auto;grid-auto-rows:100%;overflow-x:hidden;overflow-y:auto;scroll-snap-type:y mandatory;scroll-behavior:auto!important;overscroll-behavior-y:contain;background:#06152f;--bg:#06152f;--panel:#102a50;--input:#0b2143;--accent:#9abfff;--selected:#193f72;--selected-border:#9abfff;--selected-text:#edf4ff}
+#discover-view.journey::before{background:linear-gradient(180deg,#102d59,#071b3b 45%,#030d23)}
+.journey-step{min-height:0;background:radial-gradient(ellipse at 50% -15%,#264e8440,transparent 65%),linear-gradient(180deg,#102b50,#050f29);overflow-y:auto;overflow-x:hidden}
+.journey-step::before{background:linear-gradient(115deg,transparent 20%,#729ee908 48%,transparent 70%)}
+.journey-step .journey-kicker{color:#a8bfe1}.journey-step .flow-next{background:#c0d5f7;color:#071a37;border-color:#c0d5f7}.journey-step .flow-next:hover{background:#d7e6ff;transform:translateY(3px);box-shadow:0 8px 30px #8bb4ff18}
+.flow-next .step-arrow{display:flex;transform:rotate(90deg)}
+.journey-step .emoji-moods button{display:grid;place-items:center;color:#c7dbfa;background:#10294c;border-color:#6e8bb5}
+.journey-step .emoji-moods button[aria-pressed=true]{color:#f2f7ff;background:#214876;border-color:#b4d0ff;box-shadow:0 0 22px #91b7f51a,inset 0 0 0 1px #b4d0ff}
+.mood-face{display:block;width:42px;height:42px;flex:none}
+.journey-step select,.journey-step textarea,.journey-step .composer{background:#0b2143;color:#e6efff}
+.journey-status{color:#c5dafa;border-color:#9abfff}
+@media(prefers-reduced-motion:reduce){.journey-step .flow-next:hover{transform:none}}

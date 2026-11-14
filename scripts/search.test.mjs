@@ -20,14 +20,14 @@ test('private note text never becomes the query, and explicit subjects and exclu
  assert.match(relatedSearch('Happy','show cats','lighten').query,/cats/);
  assert.equal(new URL(relatedSearch('Happy','show cars https://evil.example','lighten').url).hostname,'www.tiktok.com');
 });
-async function mount(shared={elevatokSearchCursor:0},appearance={},systemDark=false,autoAccept=true){
- const ids=new Map(),nodes=[],navigations=[],removed=[],stored=[],reads=[],listeners={};
+async function mount(shared={elevatokSearchCursor:0},appearance={},systemDark=false,autoAccept=true,motion=false){
+ const ids=new Map(),nodes=[],navigations=[],removed=[],stored=[],reads=[],listeners={},frames=new Map();let nextFrame=0;
  class Element{
- constructor(tag='div'){this.tagName=tag.toUpperCase();this.children=[];this.dataset={};this.attributes={};this.value='';this.textContent='';nodes.push(this);}
+ constructor(tag='div'){this.scrollTop=0;this.offsetTop=0;this.style={removeProperty(key){if(key==='scroll-snap-type')delete this.scrollSnapType;}};this.tagName=tag.toUpperCase();this.children=[];this.dataset={};this.attributes={};this.value='';this.textContent='';nodes.push(this);}
  showModal(){this.open=true;}close(){this.open=false;}
  append(...children){this.children.push(...children);}replaceChildren(...children){this.children=[...children];}
  setAttribute(key,value){this.attributes[key]=value;}removeAttribute(key){delete this.attributes[key];if(key==='href')delete this.href;}hasAttribute(key){return key==='href'?typeof this.href==='string':key in this.attributes;}
- querySelector(selector){if(!ids.has(selector))ids.set(selector,new Element());return ids.get(selector);}
+ querySelector(selector){if(!ids.has(selector)){const node=new Element();const index=['mood','tip','before','experience','note','launch','reflect'].findIndex(id=>selector==='#journey-'+id);node.offsetTop=index<0?0:index*600;ids.set(selector,node);}return ids.get(selector);}
  querySelectorAll(){return nodes.filter(node=>node.dataset.mood);}
  click(){let prevented=false;this.onclick?.({preventDefault(){prevented=true;}});if(!prevented&&this.href)navigations.push(this.href);}
  }
@@ -37,10 +37,10 @@ async function mount(shared={elevatokSearchCursor:0},appearance={},systemDark=fa
  const chrome={storage:{local:{get:unavailable,set:unavailable,async remove(keys){removed.push(['local',keys]);}},session:{async get(keys){reads.push(Array.from(keys));assert.deepEqual(Array.from(keys),['elevatokSearchCursor','elevatokFeedback','elevatokCheckin']);return structuredClone(shared);},async set(data){assert.ok(Object.keys(data).every(key=>['elevatokSearchCursor','elevatokFeedback','elevatokCheckin'].includes(key)));if('elevatokSearchCursor' in data)assert.ok(Number.isSafeInteger(data.elevatokSearchCursor));Object.assign(shared,structuredClone(data));stored.push(structuredClone(data));},async remove(keys){removed.push(['session',keys]);for(const key of keys)delete shared[key];}}}};
  const location={hash:''};
  const localStorage={removeItem(key){delete appearance[key];},getItem(key){assert.equal(key,'elevatokTheme');return appearance[key]??null;},setItem(key,value){assert.equal(key,'elevatokTheme');assert.ok(['light','dark'].includes(value));appearance[key]=value;}};
- vm.runInNewContext(readFileSync('dist/app.js','utf8'),{document,chrome,localStorage,location,addEventListener(type,fn){listeners[type]=fn;},removeEventListener(type){delete listeners[type];},matchMedia:()=>({matches:systemDark}),setTimeout,fetch(){throw new Error('No network requests allowed');}});
+ vm.runInNewContext(readFileSync('dist/app.js','utf8'),{document,chrome,localStorage,location,requestAnimationFrame:motion?fn=>{const id=++nextFrame;frames.set(id,fn);return id;}:undefined,cancelAnimationFrame:id=>frames.delete(id),addEventListener(type,fn){listeners[type]=fn;},removeEventListener(type){delete listeners[type];},matchMedia:()=>({matches:systemDark}),setTimeout,fetch(){throw new Error('No network requests allowed');}});
  if(autoAccept)await ids.get('#consent-accept').onclick();
  await new Promise(resolve=>setImmediate(resolve));
- return {root,get:id=>root.querySelector('#'+id),nodes,navigations,removed,stored,reads,reopen(){location.hash='#open-test';listeners.hashchange();},getTheme:()=>document.documentElement.dataset.theme};
+ return {root,get:id=>root.querySelector('#'+id),nodes,navigations,removed,stored,reads,frame(time){const pending=[...frames.values()];frames.clear();for(const fn of pending)fn(time);},reopen(){location.hash='#open-test';listeners.hashchange();},getTheme:()=>document.documentElement.dataset.theme};
 }
 test('UI opens TikTok only on a click, never previews the phrase, and keeps the note when changing direction',async()=>{
  const ui=await mount();assert.equal(ui.navigations.length,0);
@@ -216,4 +216,12 @@ test('completed reflection returns to the beginning and saves the new current fe
  const shared={},ui=await mount(shared);ui.get('feeling-before').value='2';ui.get('open-tiktok').click();assert.equal(ui.get('discover-view').dataset.activeStep,'reflect');
  ui.get('feeling-after').value='4';ui.get('save-feeling').onclick();assert.equal(ui.get('discover-view').dataset.activeStep,'mood');assert.equal(ui.get('feeling-before').value,'4');assert.equal(shared.elevatokCheckin.feeling,4);assert.match(ui.get('journey-status').textContent,/Check-in complete/);
  ui.get('flow-mood').onclick();assert.equal(ui.get('discover-view').dataset.activeStep,'tip');assert.equal(ui.navigations.length,1);
+});
+
+
+test('vertical transitions animate scrollTop progressively and release snapping when complete',async()=>{
+ const ui=await mount({}, {}, false, true, true),journey=ui.get('discover-view');
+ ui.get('flow-mood').onclick();ui.frame(0);ui.frame(625);assert.ok(journey.scrollTop>0&&journey.scrollTop<600);assert.equal(journey.style.scrollSnapType,'none');
+ ui.frame(1250);assert.equal(journey.scrollTop,600);assert.equal(journey.style.scrollSnapType,undefined);
+ ui.get('flow-tip').onclick();ui.frame(1400);ui.frame(2650);assert.equal(journey.scrollTop,1200);
 });
