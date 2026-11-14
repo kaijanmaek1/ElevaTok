@@ -203,3 +203,5 @@ html,body,.app,.workspace,.sidebar,.workspace>header,.content,.content>footer,.j
 
 .native-emoji{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:38px;line-height:1;display:inline-flex;align-items:center;justify-content:center;font-weight:400;font-style:normal;padding:0;overflow:visible}
 .slider-faces .native-emoji{font-size:25px}.feeling-slider output .native-emoji{font-size:36px}
+
+.return-reminder{padding:14px 18px;margin:20px 0;border-left:3px solid #abcaff;background:#173454;border-radius:0 10px 10px 0;color:#e5efff;font-size:14px;line-height:1.7}
