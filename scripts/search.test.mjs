@@ -27,7 +27,7 @@ async function mount(shared={elevatokSearchCursor:0},appearance={},systemDark=fa
  showModal(){this.open=true;}close(){this.open=false;}
  append(...children){this.children.push(...children);}replaceChildren(...children){this.children=[...children];}
  setAttribute(key,value){this.attributes[key]=value;}removeAttribute(key){delete this.attributes[key];if(key==='href')delete this.href;}hasAttribute(key){return key==='href'?typeof this.href==='string':key in this.attributes;}
- querySelector(selector){if(!ids.has(selector)){const node=new Element();const index=['mood','tip','before','experience','note','launch','reflect'].findIndex(id=>selector==='#journey-'+id);node.offsetTop=index<0?0:index*600;ids.set(selector,node);}return ids.get(selector);}
+ querySelector(selector){if(!ids.has(selector)){const node=new Element();const index=['mood','tip','before','experience','note','launch','feedback','reflect'].findIndex(id=>selector==='#journey-'+id);node.offsetTop=index<0?0:index*600;ids.set(selector,node);}return ids.get(selector);}
  querySelectorAll(){return nodes.filter(node=>node.dataset.mood);}
  click(){let prevented=false;this.onclick?.({preventDefault(){prevented=true;}});if(!prevented&&this.href)navigations.push(this.href);}
  }
@@ -204,16 +204,16 @@ test('emoji headspaces have accessible names and check-in is restored only after
  const reopened=await mount(shared,{},false,false);assert.equal(reopened.reads.length,0);await reopened.get('consent-accept').onclick();assert.equal(reopened.get('feeling-before').value,'4');assert.equal(reopened.get('feeling-before').attributes['aria-valuetext'],'Good');
  reopened.get('review-consent').onclick();await reopened.get('consent-delete').onclick();assert.equal(shared.elevatokCheckin,undefined);
 });
-test('journey has seven screens in forward order, sliders and no back button',async()=>{
+test('journey has eight screens in forward order, sliders and no back button',async()=>{
  const ui=await mount();const html=ui.root.innerHTML;let last=-1;
- for(const id of ['mood','tip','before','experience','note','launch','reflect']){const position=html.indexOf('id="journey-'+id+'"');assert.ok(position>last,id);last=position;}
+ for(const id of ['mood','tip','before','experience','note','launch','feedback','reflect']){const position=html.indexOf('id="journey-'+id+'"');assert.ok(position>last,id);last=position;}
  assert.match(html,/id="feeling-before" type="range"/);assert.match(html,/id="feeling-after" type="range"/);assert.doesNotMatch(html,/flow-restart|Back to your headspace/);
  assert.doesNotMatch(html,/id="flow-/);assert.ok(ui.nodes.some(node=>node.className==='experience-choice'));
 });
 
 
 test('completed reflection returns to the beginning and saves the new current feeling',async()=>{
- const shared={},ui=await mount(shared);ui.get('feeling-before').value='2';ui.get('open-tiktok').click();assert.equal(ui.get('discover-view').dataset.activeStep,'reflect');
+ const shared={},ui=await mount(shared);ui.get('feeling-before').value='2';ui.get('open-tiktok').click();assert.equal(ui.get('discover-view').dataset.activeStep,'feedback');ui.get('skip-feedback').onclick();
  ui.get('feeling-after').value='4';ui.get('feeling-after').onchange();assert.equal(ui.get('discover-view').dataset.activeStep,'mood');assert.equal(ui.get('feeling-before').value,'4');assert.equal(shared.elevatokCheckin.feeling,4);assert.match(ui.get('journey-status').textContent,/Check-in complete/);
  ui.nodes.find(node=>node.dataset.mood==='Happy').onclick();assert.equal(ui.get('discover-view').dataset.activeStep,'tip');assert.equal(ui.navigations.length,1);
 });
@@ -236,6 +236,20 @@ test('choices advance automatically while typing and dragging do not interrupt i
  ui.get('note').value='show dogs';ui.get('note').oninput();assert.equal(journey.dataset.activeStep,'note');
  ui.get('note').onkeydown({key:'Enter',shiftKey:true,preventDefault(){}});assert.equal(journey.dataset.activeStep,'note');
  ui.get('note').onkeydown({key:'Enter',shiftKey:false,preventDefault(){}});assert.equal(journey.dataset.activeStep,'launch');
- assert.equal(ui.navigations.length,0);ui.get('open-tiktok').click();assert.equal(journey.dataset.activeStep,'reflect');
+ assert.equal(ui.navigations.length,0);ui.get('open-tiktok').click();assert.equal(journey.dataset.activeStep,'feedback');ui.get('feedback-more').onclick();assert.equal(journey.dataset.activeStep,'reflect');
  ui.get('feeling-after').value='5';ui.get('feeling-after').oninput();assert.equal(journey.dataset.activeStep,'reflect');ui.get('feeling-after').onchange();assert.equal(journey.dataset.activeStep,'mood');
+});
+
+
+test('search feedback and feeling reflection occupy separate screens',async()=>{
+ const ui=await mount(),html=ui.root.innerHTML;
+ const feedbackStart=html.indexOf('id="journey-feedback"'),panel=html.indexOf('id="feedback"'),reflectStart=html.indexOf('id="journey-reflect"'),reflection=html.indexOf('id="reflection"');
+ assert.ok(feedbackStart<panel&&panel<reflectStart&&reflectStart<reflection);
+ ui.get('open-tiktok').click();assert.equal(ui.get('discover-view').dataset.activeStep,'feedback');ui.get('feedback-less').onclick();assert.equal(ui.get('discover-view').dataset.activeStep,'reflect');assert.equal(ui.navigations.length,1);
+});
+
+test('Try a different path reopens experience choices without losing the note or opening TikTok',async()=>{
+ const ui=await mount();ui.get('note').value='show dogs, no news';ui.get('note').oninput();
+ for(const id of ['change-direction','feedback-path']){ui.get(id).onclick();assert.equal(ui.get('discover-view').dataset.activeStep,'experience');assert.equal(ui.get('note').value,'show dogs, no news');assert.equal(ui.navigations.length,0);}
+ assert.match(ui.root.innerHTML,/Try a different path/);
 });
